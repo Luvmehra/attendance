@@ -1,47 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Class Student Selector</title>
+  <meta charset="UTF-8">
+  <title>Student Roll Number Finder</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f8f8f8;
+      padding: 30px;
+      background-color: #f9f9f9;
     }
     label, select {
-      display: block;
       margin-top: 15px;
+      display: block;
+      font-size: 16px;
     }
-    select[multiple] {
-      height: 120px;
-    }
-    #selectedList {
+    #rollNumber {
       margin-top: 20px;
       font-weight: bold;
-      color: #003366;
+      color: #005500;
     }
   </style>
 </head>
 <body>
-  <h2>Select Students by Class</h2>
+  <h2>Find Student Roll Number</h2>
 
   <label for="classSelect">Select Class:</label>
-  <select id="classSelect" onchange="updateStudentList()">
+  <select id="classSelect" onchange="populateStudents()">
     <option value="">-- Select Class --</option>
     <option value="10">10th</option>
     <option value="12">12th</option>
   </select>
 
-  <label for="studentSelect">Select Students:</label>
-  <select id="studentSelect" multiple onchange="showSelectedStudents()">
-    <!-- student options will populate dynamically -->
+  <label for="studentSelect">Select Student:</label>
+  <select id="studentSelect" onchange="showRollNumber()">
+    <option value="">-- Select Student --</option>
   </select>
 
-  <div id="selectedList"></div>
+  <div id="rollNumber"></div>
 
   <script>
-    const data = {
+    const students = {
       "10": [
         { name: "SCS1325023", roll: "11203664" },
         { name: "SCS1321335", roll: "11203665" },
@@ -54,33 +52,27 @@
       ]
     };
 
-    function updateStudentList() {
-      const classSelect = document.getElementById("classSelect");
+    function populateStudents() {
+      const classValue = document.getElementById("classSelect").value;
       const studentSelect = document.getElementById("studentSelect");
-      const selectedList = document.getElementById("selectedList");
-      selectedList.innerHTML = "";
+      const rollDiv = document.getElementById("rollNumber");
 
-      studentSelect.innerHTML = "";
-      const selectedClass = classSelect.value;
+      studentSelect.innerHTML = `<option value="">-- Select Student --</option>`;
+      rollDiv.textContent = "";
 
-      if (data[selectedClass]) {
-        data[selectedClass].forEach((student, index) => {
-          const option = document.createElement("option");
-          option.value = index;
-          option.textContent = student.name;
-          studentSelect.appendChild(option);
+      if (students[classValue]) {
+        students[classValue].forEach((s, index) => {
+          const opt = document.createElement("option");
+          opt.value = index;
+          opt.textContent = s.name;
+          studentSelect.appendChild(opt);
         });
       }
     }
 
-    function showSelectedStudents() {
-      const classVal = document.getElementById("classSelect").value;
-      const studentSelect = document.getElementById("studentSelect");
-      const selectedList = document.getElementById("selectedList");
+    function showRollNumber() {
+      const classValue = document.getElementById("classSelect").value;
+      const studentIndex = document.getElementById("studentSelect").value;
+      const rollDiv = document.getElementById("rollNumber");
 
-      const selectedOptions = Array.from(studentSelect.selectedOptions);
-      const students = selectedOptions.map(opt => data[classVal][opt.value]);
-
-      if (students.length > 0) {
-        selectedList.innerHTML = "<h3>Selected Students:</h3><ul>" +
-          students.map(s =>
+      if (classValue && student
