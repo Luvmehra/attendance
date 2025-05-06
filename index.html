@@ -75,4 +75,13 @@
       const studentIndex = document.getElementById("studentSelect").value;
       const rollDiv = document.getElementById("rollNumber");
 
-      if (classValue && student
+      if (classValue && studentIndex !== "") {
+        const student = students[classValue][studentIndex];
+        rollDiv.textContent = `Roll Number: ${student.roll}`;
+      } else {
+        rollDiv.textContent = "";
+      }
+    }
+  </script>
+</body>
+</html>
