@@ -2,21 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Find Roll Number by Name</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Attendance</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 30px;
       background-color: #f5f5f5;
     }
-    input, button {
+    select, input[type="checkbox"], button {
       padding: 10px;
       font-size: 16px;
       margin-top: 10px;
       width: 100%;
-      max-width: 400px;
+      max-width: 300px;
+      margin-bottom: 15px;
     }
-    #result {
+    .attendance-list {
+      margin-top: 20px;
+    }
+    .attendance-list label {
+      font-size: 16px;
+    }
+    #attendanceResult {
       margin-top: 20px;
       font-weight: bold;
       color: green;
@@ -25,35 +33,93 @@
 </head>
 <body>
 
-  <h2>Search Student Roll Number</h2>
+  <h1>Take Attendance</h1>
   
-  <label for="studentName">Enter Student Name (e.g., SCS1325023):</label>
-  <input type="text" id="studentName" placeholder="Student Name" />
+  <label for="classSelect">Select Class:</label>
+  <select id="classSelect" onchange="loadStudents()">
+    <option value="">Select Class</option>
+    <option value="10">Class 10</option>
+    <option value="12">Class 12</option>
+  </select>
 
-  <button onclick="getRollNumber()">Get Roll Number</button>
+  <div class="attendance-list" id="attendanceList">
+    <!-- Student checkboxes will appear here after class selection -->
+  </div>
 
-  <div id="result"></div>
+  <button onclick="submitAttendance()">Submit Attendance</button>
+
+  <div id="attendanceResult"></div>
 
   <script>
-    const students = [
-      { name: "SCS1325023", roll: "11203664" },
-      { name: "SCS1321335", roll: "11203665" },
-      { name: "SCS1581811", roll: "11203680" },
-      { name: "SCS1408571", roll: "11203658" },
-      { name: "SCS1500425", roll: "11686181" },
-      { name: "SCS1399710", roll: "11686178" }
-    ];
+    const students = {
+      10: [
+        { name: "SCS1325023", roll: "11203664" },
+        { name: "SCS1321335", roll: "11203665" },
+        { name: "SCS1581811", roll: "11203680" },
+        { name: "SCS1408571", roll: "11203658" }
+      ],
+      12: [
+        { name: "SCS1500425", roll: "11686181" },
+        { name: "SCS1399710", roll: "11686178" },
+        { name: "SCS1321412", roll: "11686179" },
+        { name: "SCS1359828", roll: "11686180" }
+      ]
+    };
 
-    function getRollNumber() {
-      const nameInput = document.getElementById("studentName").value.trim().toUpperCase();
-      const resultDiv = document.getElementById("result");
+    function loadStudents() {
+      const classSelect = document.getElementById("classSelect");
+      const classValue = classSelect.value;
+      const attendanceList = document.getElementById("attendanceList");
 
-      const student = students.find(s => s.name === nameInput);
+      // Clear the attendance list before loading new students
+      attendanceList.innerHTML = '';
 
-      if (student) {
-        resultDiv.textContent = `Roll Number of ${student.name} is ${student.roll}`;
+      if (classValue) {
+        const classStudents = students[classValue];
+
+        // Display students as checkboxes
+        classStudents.forEach(student => {
+          const label = document.createElement("label");
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.value = student.roll;
+          checkbox.id = student.roll;
+
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode(`${student.name} (Roll: ${student.roll})`));
+
+          attendanceList.appendChild(label);
+          attendanceList.appendChild(document.createElement("br"));
+        });
+      }
+    }
+
+    function submitAttendance() {
+      const classSelect = document.getElementById("classSelect");
+      const classValue = classSelect.value;
+      const attendanceList = document.getElementById("attendanceList");
+      const attendanceResult = document.getElementById("attendanceResult");
+
+      if (!classValue) {
+        attendanceResult.textContent = "Please select a class first.";
+        return;
+      }
+
+      const classStudents = students[classValue];
+      let presentStudents = [];
+
+      // Get all checked checkboxes (present students)
+      classStudents.forEach(student => {
+        const checkbox = document.getElementById(student.roll);
+        if (checkbox && checkbox.checked) {
+          presentStudents.push(student.name);
+        }
+      });
+
+      if (presentStudents.length > 0) {
+        attendanceResult.textContent = `Attendance submitted. Present Students: ${presentStudents.join(", ")}`;
       } else {
-        resultDiv.textContent = "No matching student found.";
+        attendanceResult.textContent = "No students marked as present.";
       }
     }
   </script>
