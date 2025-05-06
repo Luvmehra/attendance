@@ -3,131 +3,201 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Multi-Class Attendance</title>
+  <title>Attendance Tracker</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
       padding: 20px;
-      background-color: #f2f2f2;
+      background-color: #f4f6f8;
     }
-    h1 {
+
+    h1, h2 {
       color: #333;
     }
-    select, button {
+
+    select, input[type="text"], button {
       padding: 10px;
       font-size: 16px;
-      margin: 10px 0;
+      margin-top: 10px;
       width: 100%;
       max-width: 300px;
     }
-    .student-entry {
-      margin: 5px 0;
-    }
-    .class-section {
-      margin-bottom: 30px;
-      padding: 10px;
-      background-color: #fff;
-      border: 1px solid #ccc;
-    }
-    #attendanceResult {
+
+    #studentList {
       margin-top: 20px;
+      max-width: 600px;
+      background-color: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+
+    #studentList table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    #studentList th, #studentList td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    #studentList th {
+      position: sticky;
+      top: 0;
+      background: #f0f0f0;
+    }
+
+    .checkbox-cell {
+      text-align: center;
+    }
+
+    .present-count {
+      margin-top: 10px;
       font-weight: bold;
       color: green;
+    }
+
+    #presentRolls {
+      white-space: pre-wrap;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 10px;
+      max-width: 600px;
+      border-radius: 5px;
+    }
+
+    .copy-btn {
+      margin-top: 5px;
+      cursor: pointer;
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
 
-  <h1>Multi-Class Student Attendance</h1>
+  <h1>Student Attendance</h1>
 
   <label for="classSelect">Select Class:</label>
   <select id="classSelect">
-    <option value="">-- Select Class --</option>
-    <option value="Class10">Class 10</option>
-    <option value="Class12">Class 12</option>
+    <option value="">-- Choose Class --</option>
+    <option value="10">Class 10</option>
+    <option value="12">Class 12</option>
   </select>
 
-  <button onclick="loadStudents()">Load Students</button>
+  <input type="text" id="searchInput" placeholder="Search student..." />
 
   <div id="studentList"></div>
 
-  <button onclick="getAttendance()">Submit Attendance</button>
+  <button onclick="submitAttendance()">Submit Attendance</button>
 
-  <div id="attendanceResult"></div>
+  <div class="present-count" id="countDisplay"></div>
+
+  <h2>Present Students' Roll Numbers:</h2>
+  <div id="presentRolls"></div>
+  <button class="copy-btn" onclick="copyToClipboard()">Copy to Clipboard</button>
 
   <script>
-    const students = {
-      Class10: [
-        { name: "Amit Kumar", roll: "101" },
-        { name: "Neha Singh", roll: "102" },
-        { name: "Ravi Verma", roll: "103" }
+    const studentsByClass = {
+      "10": [
+        { name: "Alice", roll: "101" },
+        { name: "Bob", roll: "102" },
+        { name: "Charlie", roll: "103" }
       ],
-      Class12: [
-        { name: "Priya Sharma", roll: "201" },
-        { name: "Karan Patel", roll: "202" },
-        { name: "Anjali Yadav", roll: "203" }
+      "12": [
+        { name: "David", roll: "201" },
+        { name: "Eva", roll: "202" },
+        { name: "Frank", roll: "203" }
       ]
     };
 
-    const loadedClasses = new Set();
+    const allAttendance = {};  // Holds attendance across all classes
 
-    function loadStudents() {
-      const selectedClass = document.getElementById("classSelect").value;
-      const studentListDiv = document.getElementById("studentList");
+    function loadStudents(classId) {
+      if (!classId) return;
 
-      // Avoid reloading the same class
-      if (!selectedClass || loadedClasses.has(selectedClass)) return;
-
-      loadedClasses.add(selectedClass);
-
-      const classDiv = document.createElement("div");
-      classDiv.className = "class-section";
-      classDiv.id = `section-${selectedClass}`;
-
-      const heading = document.createElement("h3");
-      heading.textContent = `Class: ${selectedClass}`;
-      classDiv.appendChild(heading);
-
-      students[selectedClass].forEach(student => {
-        const div = document.createElement("div");
-        div.className = "student-entry";
-
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.id = `${selectedClass}-${student.roll}`;
-        checkbox.value = student.roll;
-        checkbox.classList.add("student-checkbox");
-
-        const label = document.createElement("label");
-        label.htmlFor = checkbox.id;
-        label.textContent = `${student.name} (Roll: ${student.roll})`;
-
-        div.appendChild(checkbox);
-        div.appendChild(label);
-        classDiv.appendChild(div);
-      });
-
-      studentListDiv.appendChild(classDiv);
-    }
-
-    function getAttendance() {
-      const checkboxes = document.querySelectorAll(".student-checkbox");
-      const presentRolls = [];
-
-      checkboxes.forEach(cb => {
-        if (cb.checked) {
-          presentRolls.push(cb.value);
-        }
-      });
-
-      const resultDiv = document.getElementById("attendanceResult");
-
-      if (presentRolls.length > 0) {
-        resultDiv.textContent = "Present Roll Numbers: " + presentRolls.join(", ");
-      } else {
-        resultDiv.textContent = "No students marked as present.";
+      const container = document.getElementById("studentList");
+      if (!allAttendance[classId]) {
+        allAttendance[classId] = {};
       }
+
+      const students = studentsByClass[classId];
+      const tableId = `table-${classId}`;
+      if (document.getElementById(tableId)) return; // Already loaded
+
+      const table = document.createElement("table");
+      table.id = tableId;
+      table.innerHTML = `
+        <thead>
+          <tr><th colspan="3">Class ${classId}</th></tr>
+          <tr>
+            <th>Name</th><th>Roll No</th><th>Present</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${students.map(student => `
+            <tr>
+              <td>${student.name}</td>
+              <td>${student.roll}</td>
+              <td class="checkbox-cell">
+                <input type="checkbox" 
+                       onchange="markAttendance('${classId}', '${student.roll}', this.checked)"
+                       ${allAttendance[classId][student.roll] ? "checked" : ""}>
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      `;
+      container.appendChild(table);
     }
+
+    function markAttendance(classId, roll, isPresent) {
+      if (!allAttendance[classId]) allAttendance[classId] = {};
+      allAttendance[classId][roll] = isPresent;
+    }
+
+    function submitAttendance() {
+      const present = [];
+
+      Object.entries(allAttendance).forEach(([classId, rolls]) => {
+        Object.entries(rolls).forEach(([roll, isPresent]) => {
+          if (isPresent) present.push(roll);
+        });
+      });
+
+      document.getElementById("presentRolls").textContent = present.join(", ");
+      document.getElementById("countDisplay").textContent = `Total Present: ${present.length}`;
+    }
+
+    function copyToClipboard() {
+      const text = document.getElementById("presentRolls").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Copied to clipboard!");
+      });
+    }
+
+    document.getElementById("classSelect").addEventListener("change", function () {
+      loadStudents(this.value);
+    });
+
+    document.getElementById("searchInput").addEventListener("input", function () {
+      const query = this.value.toLowerCase();
+      const tables = document.querySelectorAll("#studentList table");
+
+      tables.forEach(table => {
+        const rows = table.querySelectorAll("tbody tr");
+        rows.forEach(row => {
+          const nameCell = row.cells[0].textContent.toLowerCase();
+          row.style.display = nameCell.includes(query) ? "" : "none";
+        });
+      });
+    });
   </script>
 
 </body>
