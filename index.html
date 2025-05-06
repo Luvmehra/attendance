@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Attendance Page</title>
+  <title>Multi-Class Attendance</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 30px;
-      background-color: #f9f9f9;
+      padding: 20px;
+      background-color: #f2f2f2;
+    }
+    h1 {
+      color: #333;
     }
     select, button {
       padding: 10px;
@@ -20,94 +23,112 @@
     .student-entry {
       margin: 5px 0;
     }
-    .student-entry label {
-      margin-left: 10px;
+    .class-section {
+      margin-bottom: 30px;
+      padding: 10px;
+      background-color: #fff;
+      border: 1px solid #ccc;
     }
     #attendanceResult {
       margin-top: 20px;
-      color: green;
       font-weight: bold;
+      color: green;
     }
   </style>
 </head>
 <body>
-  <h2>Student Attendance</h2>
+
+  <h1>Multi-Class Student Attendance</h1>
+
   <label for="classSelect">Select Class:</label>
-  <select id="classSelect" onchange="loadStudents()">
-    <option value="">-- Select --</option>
-    <option value="10">Class 10</option>
-    <option value="12">Class 12</option>
+  <select id="classSelect">
+    <option value="">-- Select Class --</option>
+    <option value="Class10">Class 10</option>
+    <option value="Class12">Class 12</option>
   </select>
+
+  <button onclick="loadStudents()">Load Students</button>
 
   <div id="studentList"></div>
 
-  <button onclick="submitAttendance()">Submit Attendance</button>
+  <button onclick="getAttendance()">Submit Attendance</button>
 
   <div id="attendanceResult"></div>
 
   <script>
     const students = {
-      10: [
-        { name: "SCS1325023", roll: "11203664" },
-        { name: "SCS1321335", roll: "11203665" },
-        { name: "SCS1581811", roll: "11203680" },
+      Class10: [
+        { name: "Amit Kumar", roll: "101" },
+        { name: "Neha Singh", roll: "102" },
+        { name: "Ravi Verma", roll: "103" }
       ],
-      12: [
-        { name: "SCS1500425", roll: "11686181" },
-        { name: "SCS1399710", roll: "11686178" },
-        { name: "SCS1321412", roll: "11686179" },
+      Class12: [
+        { name: "Priya Sharma", roll: "201" },
+        { name: "Karan Patel", roll: "202" },
+        { name: "Anjali Yadav", roll: "203" }
       ]
     };
+
+    const loadedClasses = new Set();
 
     function loadStudents() {
       const selectedClass = document.getElementById("classSelect").value;
       const studentListDiv = document.getElementById("studentList");
-      studentListDiv.innerHTML = ""; // Clear existing list
 
-      if (students[selectedClass]) {
-        students[selectedClass].forEach(student => {
-          const div = document.createElement("div");
-          div.classList.add("student-entry");
+      // Avoid reloading the same class
+      if (!selectedClass || loadedClasses.has(selectedClass)) return;
 
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          checkbox.id = student.roll;
-          checkbox.value = student.name;
+      loadedClasses.add(selectedClass);
 
-          const label = document.createElement("label");
-          label.htmlFor = student.roll;
-          label.textContent = `${student.name} (Roll: ${student.roll})`;
+      const classDiv = document.createElement("div");
+      classDiv.className = "class-section";
+      classDiv.id = `section-${selectedClass}`;
 
-          div.appendChild(checkbox);
-          div.appendChild(label);
-          studentListDiv.appendChild(div);
-        });
-      }
+      const heading = document.createElement("h3");
+      heading.textContent = `Class: ${selectedClass}`;
+      classDiv.appendChild(heading);
+
+      students[selectedClass].forEach(student => {
+        const div = document.createElement("div");
+        div.className = "student-entry";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `${selectedClass}-${student.roll}`;
+        checkbox.value = student.roll;
+        checkbox.classList.add("student-checkbox");
+
+        const label = document.createElement("label");
+        label.htmlFor = checkbox.id;
+        label.textContent = `${student.name} (Roll: ${student.roll})`;
+
+        div.appendChild(checkbox);
+        div.appendChild(label);
+        classDiv.appendChild(div);
+      });
+
+      studentListDiv.appendChild(classDiv);
     }
 
-    function submitAttendance() {
-      const selectedClass = document.getElementById("classSelect").value;
-      const attendanceResult = document.getElementById("attendanceResult");
+    function getAttendance() {
+      const checkboxes = document.querySelectorAll(".student-checkbox");
+      const presentRolls = [];
 
-      if (!selectedClass || !students[selectedClass]) {
-        attendanceResult.textContent = "Please select a class.";
-        return;
-      }
-
-      const present = [];
-      students[selectedClass].forEach(student => {
-        const checkbox = document.getElementById(student.roll);
-        if (checkbox && checkbox.checked) {
-          present.push(`${student.name} (Roll: ${student.roll})`);
+      checkboxes.forEach(cb => {
+        if (cb.checked) {
+          presentRolls.push(cb.value);
         }
       });
 
-      if (present.length > 0) {
-        attendanceResult.innerHTML = `<strong>Present Students:</strong><br>${present.join("<br>")}`;
+      const resultDiv = document.getElementById("attendanceResult");
+
+      if (presentRolls.length > 0) {
+        resultDiv.textContent = "Present Roll Numbers: " + presentRolls.join(", ");
       } else {
-        attendanceResult.textContent = "No students marked as present.";
+        resultDiv.textContent = "No students marked as present.";
       }
     }
   </script>
+
 </body>
 </html>
