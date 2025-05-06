@@ -5,11 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Attendance Tracker</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 20px;
       background-color: #f4f6f8;
+      line-height: 1.6;
     }
 
     h1, h2 {
@@ -17,35 +22,37 @@
     }
 
     select, input[type="text"], button {
-      padding: 10px;
+      padding: 12px;
       font-size: 16px;
-      margin-top: 10px;
+      margin: 10px 0;
       width: 100%;
-      max-width: 300px;
+      max-width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
     }
 
     #studentList {
       margin-top: 20px;
-      max-width: 600px;
       background-color: white;
       padding: 10px;
       border-radius: 8px;
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      overflow-x: auto;
     }
 
     #studentList table {
       width: 100%;
       border-collapse: collapse;
+      min-width: 400px;
     }
 
     #studentList th, #studentList td {
       padding: 8px 12px;
       border-bottom: 1px solid #ddd;
+      text-align: left;
     }
 
     #studentList th {
-      position: sticky;
-      top: 0;
       background: #f0f0f0;
     }
 
@@ -65,24 +72,34 @@
       border: 1px solid #ccc;
       padding: 10px;
       margin-top: 10px;
-      max-width: 600px;
       border-radius: 5px;
     }
 
     .copy-btn {
-      margin-top: 5px;
-      cursor: pointer;
       background: #007bff;
       color: white;
       border: none;
-      padding: 5px 10px;
+      padding: 10px;
       border-radius: 5px;
+      margin-top: 10px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    @media (max-width: 600px) {
+      h1, h2 {
+        font-size: 20px;
+      }
+
+      #studentList table {
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <h1>Student Attendance</h1>
+  <h1>📋 Student Attendance</h1>
 
   <label for="classSelect">Select Class:</label>
   <select id="classSelect">
@@ -91,17 +108,17 @@
     <option value="12">Class 12</option>
   </select>
 
-  <input type="text" id="searchInput" placeholder="Search student..." />
+  <input type="text" id="searchInput" placeholder="🔍 Search student..." />
 
   <div id="studentList"></div>
 
-  <button onclick="submitAttendance()">Submit Attendance</button>
+  <button onclick="submitAttendance()">✅ Submit Attendance</button>
 
   <div class="present-count" id="countDisplay"></div>
 
-  <h2>Present Students' Roll Numbers:</h2>
+  <h2>🎓 Present Students' Roll Numbers:</h2>
   <div id="presentRolls"></div>
-  <button class="copy-btn" onclick="copyToClipboard()">Copy to Clipboard</button>
+  <button class="copy-btn" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
 
   <script>
     const studentsByClass = {
@@ -117,28 +134,22 @@
       ]
     };
 
-    const allAttendance = {};  // Holds attendance across all classes
+    const allAttendance = {};
 
     function loadStudents(classId) {
       if (!classId) return;
-
       const container = document.getElementById("studentList");
-      if (!allAttendance[classId]) {
-        allAttendance[classId] = {};
-      }
-
+      if (!allAttendance[classId]) allAttendance[classId] = {};
       const students = studentsByClass[classId];
       const tableId = `table-${classId}`;
-      if (document.getElementById(tableId)) return; // Already loaded
+      if (document.getElementById(tableId)) return;
 
       const table = document.createElement("table");
       table.id = tableId;
       table.innerHTML = `
         <thead>
           <tr><th colspan="3">Class ${classId}</th></tr>
-          <tr>
-            <th>Name</th><th>Roll No</th><th>Present</th>
-          </tr>
+          <tr><th>Name</th><th>Roll No</th><th>Present</th></tr>
         </thead>
         <tbody>
           ${students.map(student => `
@@ -164,7 +175,6 @@
 
     function submitAttendance() {
       const present = [];
-
       Object.entries(allAttendance).forEach(([classId, rolls]) => {
         Object.entries(rolls).forEach(([roll, isPresent]) => {
           if (isPresent) present.push(roll);
