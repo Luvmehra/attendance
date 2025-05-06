@@ -2,86 +2,61 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Student Roll Number Finder</title>
+  <title>Find Roll Number by Name</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 30px;
-      background-color: #f9f9f9;
+      background-color: #f5f5f5;
     }
-    label, select {
-      margin-top: 15px;
-      display: block;
+    input, button {
+      padding: 10px;
       font-size: 16px;
+      margin-top: 10px;
+      width: 100%;
+      max-width: 400px;
     }
-    #rollNumber {
+    #result {
       margin-top: 20px;
       font-weight: bold;
-      color: #005500;
+      color: green;
     }
   </style>
 </head>
 <body>
-  <h2>Find Student Roll Number</h2>
 
-  <label for="classSelect">Select Class:</label>
-  <select id="classSelect" onchange="populateStudents()">
-    <option value="">-- Select Class --</option>
-    <option value="10">10th</option>
-    <option value="12">12th</option>
-  </select>
+  <h2>Search Student Roll Number</h2>
+  
+  <label for="studentName">Enter Student Name (e.g., SCS1325023):</label>
+  <input type="text" id="studentName" placeholder="Student Name" />
 
-  <label for="studentSelect">Select Student:</label>
-  <select id="studentSelect" onchange="showRollNumber()">
-    <option value="">-- Select Student --</option>
-  </select>
+  <button onclick="getRollNumber()">Get Roll Number</button>
 
-  <div id="rollNumber"></div>
+  <div id="result"></div>
 
   <script>
-    const students = {
-      "10": [
-        { name: "SCS1325023", roll: "11203664" },
-        { name: "SCS1321335", roll: "11203665" },
-        { name: "SCS1581811", roll: "11203680" }
-      ],
-      "12": [
-        { name: "SCS1408571", roll: "11203658" },
-        { name: "SCS1500425", roll: "11686181" },
-        { name: "SCS1399710", roll: "11686178" }
-      ]
-    };
+    const students = [
+      { name: "SCS1325023", roll: "11203664" },
+      { name: "SCS1321335", roll: "11203665" },
+      { name: "SCS1581811", roll: "11203680" },
+      { name: "SCS1408571", roll: "11203658" },
+      { name: "SCS1500425", roll: "11686181" },
+      { name: "SCS1399710", roll: "11686178" }
+    ];
 
-    function populateStudents() {
-      const classValue = document.getElementById("classSelect").value;
-      const studentSelect = document.getElementById("studentSelect");
-      const rollDiv = document.getElementById("rollNumber");
+    function getRollNumber() {
+      const nameInput = document.getElementById("studentName").value.trim().toUpperCase();
+      const resultDiv = document.getElementById("result");
 
-      studentSelect.innerHTML = `<option value="">-- Select Student --</option>`;
-      rollDiv.textContent = "";
+      const student = students.find(s => s.name === nameInput);
 
-      if (students[classValue]) {
-        students[classValue].forEach((s, index) => {
-          const opt = document.createElement("option");
-          opt.value = index;
-          opt.textContent = s.name;
-          studentSelect.appendChild(opt);
-        });
-      }
-    }
-
-    function showRollNumber() {
-      const classValue = document.getElementById("classSelect").value;
-      const studentIndex = document.getElementById("studentSelect").value;
-      const rollDiv = document.getElementById("rollNumber");
-
-      if (classValue && studentIndex !== "") {
-        const student = students[classValue][studentIndex];
-        rollDiv.textContent = `Roll Number: ${student.roll}`;
+      if (student) {
+        resultDiv.textContent = `Roll Number of ${student.name} is ${student.roll}`;
       } else {
-        rollDiv.textContent = "";
+        resultDiv.textContent = "No matching student found.";
       }
     }
   </script>
+
 </body>
 </html>
