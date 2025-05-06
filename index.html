@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Class Student Lookup</title>
+  <meta charset="UTF-8" />
+  <title>Class Student Selector</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,15 +13,18 @@
       display: block;
       margin-top: 15px;
     }
-    #rollNumber {
+    select[multiple] {
+      height: 120px;
+    }
+    #selectedList {
       margin-top: 20px;
       font-weight: bold;
-      color: #006600;
+      color: #003366;
     }
   </style>
 </head>
 <body>
-  <h2>Student Roll Number Finder</h2>
+  <h2>Select Students by Class</h2>
 
   <label for="classSelect">Select Class:</label>
   <select id="classSelect" onchange="updateStudentList()">
@@ -30,57 +33,54 @@
     <option value="12">12th</option>
   </select>
 
-  <label for="studentSelect">Select Student:</label>
-  <select id="studentSelect" onchange="showRollNumber()">
-    <option value="">-- Select Student --</option>
+  <label for="studentSelect">Select Students:</label>
+  <select id="studentSelect" multiple onchange="showSelectedStudents()">
+    <!-- student options will populate dynamically -->
   </select>
 
-  <div id="rollNumber"></div>
+  <div id="selectedList"></div>
 
   <script>
-    // Sample data
     const data = {
       "10": [
         { name: "SCS1325023", roll: "11203664" },
-        { name: "SCS1321335", roll: "11203665" }
+        { name: "SCS1321335", roll: "11203665" },
+        { name: "SCS1581811", roll: "11203680" }
       ],
       "12": [
         { name: "SCS1408571", roll: "11203658" },
-        { name: "SCS1500425", roll: "11686181" }
+        { name: "SCS1500425", roll: "11686181" },
+        { name: "SCS1399710", roll: "11686178" }
       ]
     };
 
     function updateStudentList() {
       const classSelect = document.getElementById("classSelect");
       const studentSelect = document.getElementById("studentSelect");
-      const rollNumberDiv = document.getElementById("rollNumber");
+      const selectedList = document.getElementById("selectedList");
+      selectedList.innerHTML = "";
 
-      // Clear previous data
-      studentSelect.innerHTML = `<option value="">-- Select Student --</option>`;
-      rollNumberDiv.textContent = "";
-
+      studentSelect.innerHTML = "";
       const selectedClass = classSelect.value;
+
       if (data[selectedClass]) {
-        data[selectedClass].forEach(student => {
+        data[selectedClass].forEach((student, index) => {
           const option = document.createElement("option");
-          option.value = student.roll;
+          option.value = index;
           option.textContent = student.name;
           studentSelect.appendChild(option);
         });
       }
     }
 
-    function showRollNumber() {
+    function showSelectedStudents() {
+      const classVal = document.getElementById("classSelect").value;
       const studentSelect = document.getElementById("studentSelect");
-      const rollNumberDiv = document.getElementById("rollNumber");
-      const roll = studentSelect.value;
+      const selectedList = document.getElementById("selectedList");
 
-      if (roll) {
-        rollNumberDiv.textContent = `Roll Number: ${roll}`;
-      } else {
-        rollNumberDiv.textContent = "";
-      }
-    }
-  </script>
-</body>
-</html>
+      const selectedOptions = Array.from(studentSelect.selectedOptions);
+      const students = selectedOptions.map(opt => data[classVal][opt.value]);
+
+      if (students.length > 0) {
+        selectedList.innerHTML = "<h3>Selected Students:</h3><ul>" +
+          students.map(s =>
